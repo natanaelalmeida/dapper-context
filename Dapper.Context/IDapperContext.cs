@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Dapper.Context
 {
@@ -9,6 +10,7 @@ namespace Dapper.Context
         T GetSave<T>(T entity, string sql);
         T Find<T>(string sql, object where = null);
         IEnumerable<T> FindAll<T>(string sql, object where = null);
+        void FindJoin<TFirst, TSecond, TReturn>(string sql, Func<TFirst, TSecond, TReturn> map, object where = null, string indexs = "Id");
         bool Delete(string sql, object where = null);
         void Commit();
     }
