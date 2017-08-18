@@ -51,7 +51,7 @@ namespace Dapper.Context
             IsCommandSQlValid(sql);
             Open();
 
-            return _connection.Query<T>(sql).SingleOrDefault();
+            return _connection.Query<T>(sql, where, _transaction).SingleOrDefault();
         }
 
         public IEnumerable<T> FindAll<T>(string sql, object where = null)
@@ -109,8 +109,11 @@ namespace Dapper.Context
 
         private void Open()
         {
-            _connection.Open();
-            _transaction = _connection.BeginTransaction();
+            if (_connection.State != ConnectionState.Open)
+            {
+                _connection.Open();
+                _transaction = _connection.BeginTransaction();
+            }
         }
     }
 }
