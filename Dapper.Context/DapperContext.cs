@@ -13,12 +13,12 @@ namespace Dapper.Context
 
         public DapperContext()
         {
-            _connection = new SqlConnection("connection string");            
-        }
+            _connection = new SqlConnection(Conexao.GetApplicationConnectionString(Conexao.ConectionType.Curso));            
+        }        
 
         public bool Save<T>(T entity, string sql)
         {
-            IsEntityValid(entity);
+            IsEntityValid(entity);                            
             IsCommandSQlValid(sql);
             Open();
 
@@ -41,9 +41,9 @@ namespace Dapper.Context
             Open();
 
             return SaveExec<T>(sql, entity); ;
-        }
+        }           
 
-        private T Save<T>(string sql, object entity) => _connection.Query<T>(sql, entity, _transaction).SingleOrDefault();
+        private T Save<T>(string sql, object entity) =>  _connection.Query<T>(sql, entity, _transaction).SingleOrDefault();
         private bool SaveExec<T>(string sql, object entity) => _connection.Execute(sql, entity, _transaction) > 0;
 
         public T Find<T>(string sql, object where = null)
@@ -62,12 +62,20 @@ namespace Dapper.Context
             return _connection.Query<T>(sql, where, _transaction).ToList();
         }
 
-        public void FindJoin<TFirst, TSecond, TReturn>(string sql, Func<TFirst, TSecond, TReturn> map, object where = null, string indexs = "Id")
+        public void Join<TFirst, TSecond, TReturn>(string sql, Func<TFirst, TSecond, TReturn> map, object where = null, string indexs = "Id")
         {
             IsCommandSQlValid(sql);
             Open();
 
             _connection.Query<TFirst, TSecond, TReturn>(sql, map, param: where, transaction: _transaction, splitOn: indexs).ToList();
+        }
+
+        public void Join<TFirst, TSecond, TThird, TReturn>(string sql, Func<TFirst, TSecond, TThird, TReturn> map, object where = null, string indexs = "Id")
+        {
+            IsCommandSQlValid(sql);
+            Open();
+
+            _connection.Query(sql, map, param: where, transaction: _transaction, splitOn: indexs).ToList();
         }
 
         public bool Delete(string sql, object where = null)
@@ -80,7 +88,7 @@ namespace Dapper.Context
 
         public void Commit()
         {
-            if (_connection.State == ConnectionState.Open && _transaction != null)
+            if(_connection.State == ConnectionState.Open && _transaction != null)
             {
                 _transaction.Commit();
                 Dispose();
@@ -89,11 +97,11 @@ namespace Dapper.Context
 
         public void Dispose()
         {
-            if (_connection.State == ConnectionState.Open)
-                _connection.Close();
+            if (_connection.State == ConnectionState.Open)            
+                _connection.Close();                            
 
             _connection.Dispose();
-        }
+        }       
 
         private void IsCommandSQlValid(string sql)
         {
@@ -109,11 +117,11 @@ namespace Dapper.Context
 
         private void Open()
         {
-            if (_connection.State != ConnectionState.Open)
+            if(_connection.State != ConnectionState.Open)
             {
                 _connection.Open();
                 _transaction = _connection.BeginTransaction();
-            }
+            }            
         }
     }
 }
