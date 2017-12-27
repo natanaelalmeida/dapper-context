@@ -11,7 +11,9 @@ namespace Dapper.Context
         T Find<T>(string sql, object where = null);
         IEnumerable<T> FindAll<T>(string sql, object where = null);
         void Join<TFirst, TSecond, TReturn>(string sql, Func<TFirst, TSecond, TReturn> map, object where = null, string indexs = "Id");
+        void Join<TFirst, TSecond, TThird, TReturn>(string sql, Func<TFirst, TSecond, TThird, TReturn> map, object where = null, string indexs = "Id");
         bool Delete(string sql, object where = null);
+        T ExecFunction<T>(string function);
         void Commit();
     }
 }
